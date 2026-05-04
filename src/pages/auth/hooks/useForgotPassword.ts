@@ -12,12 +12,13 @@ export const useForgotPassword = () => {
       const response = await api.post('/auth/forgot-password', data);
       return response.data;
     },
-    onSuccess: (data, variables) => {
+    onSuccess: ( variables) => {
       toast.success('If an account exists, you will receive an OTP');
       // Store email in sessionStorage for reset password page
       sessionStorage.setItem('resetEmail', variables.email);
     },
-    onError: (error: any) => {
+    // onError: (error: any) => {
+     onError: () => {
       // Don't show error for security reasons (backend also returns success)
       console.log('Password reset request processed');
     },

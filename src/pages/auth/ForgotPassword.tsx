@@ -7,7 +7,7 @@ import { useForgotPassword } from './hooks/useForgotPassword';
 
 export const ForgotPassword = () => {
   const [email, setEmail] = useState('');
-  const { mutate: forgotPassword, isPending, isSuccess, error, data } = useForgotPassword();
+  const { mutate: forgotPassword, isPending, isSuccess, error } = useForgotPassword();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

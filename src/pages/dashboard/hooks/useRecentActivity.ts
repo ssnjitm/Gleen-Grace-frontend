@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../../core/config/axios';
-import { RecentActivity } from '../types/dashboard.types';
+import type { RecentActivity } from '../../../core/types/dashboard.types';
+// import { RecentActivity } from '../types/dashboard.types';
 
 export const useRecentActivity = () => {
   return useQuery({

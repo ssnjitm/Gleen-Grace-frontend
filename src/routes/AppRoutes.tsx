@@ -11,6 +11,7 @@ import { ForgotPassword } from '../pages/auth/ForgotPassword';
 import { ResetPassword } from '../pages/auth/ResetPassword';
 import { Unauthorized } from '../core/components/common/Unauthorized';
 import { NotFound } from '../core/components/common/NotFound';
+import { Dashboard } from '../pages/dashboard/Dashboard';
 
 
 // // Dashboard Pages
@@ -40,7 +41,7 @@ export const AppRoutes = () => {
       <Route element={<ProtectedRoute />}>
         {/* Dashboard and main routes */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+        <Route path="/dashboard" element={<Dashboard />} />
         
         {/* Admin only routes */}
         <Route element={<RoleGuard allowedRoles={['ADMIN']} />}>

@@ -23,7 +23,7 @@ export const useVerifyOTP = () => {
       
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       // Clear temporary email and any cached signup data
       clearTempEmail(null);
       queryClient.removeQueries({ queryKey: ['signupData'] });
