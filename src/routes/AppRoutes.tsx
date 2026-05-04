@@ -6,9 +6,12 @@ import { RoleGuard } from './RoleGuard';
 // Auth Pages
 import { Login } from '../pages/auth/login';
 import { Signup } from '../pages/auth/signup';
-// import { VerifyOTP } from '../features/auth/pages/VerifyOTP';
-// import { ForgotPassword } from '../features/auth/pages/ForgotPassword';
-// import { ResetPassword } from '../features/auth/pages/ResetPassword';
+import { VerifyOTP } from '../pages/auth/VerifyOTP';
+import { ForgotPassword } from '../pages/auth/ForgotPassword';
+import { ResetPassword } from '../pages/auth/ResetPassword';
+import { Unauthorized } from '../core/components/common/Unauthorized';
+import { NotFound } from '../core/components/common/NotFound';
+
 
 // // Dashboard Pages
 // import { Dashboard } from '../features/dashboard/pages/Dashboard';
@@ -28,9 +31,9 @@ export const AppRoutes = () => {
       <Route element={<PublicRoute />}>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        {/* <Route path="/verify-otp" element={<VerifyOTP />} />
+        <Route path="/verify-otp" element={<VerifyOTP />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} /> */}
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Route>
 
       {/* Protected Routes - Authentication required */}
@@ -59,8 +62,8 @@ export const AppRoutes = () => {
       </Route>
 
       {/* Common Routes */}
-      {/* <Route path="/unauthorized" element={<Unauthorized />} />
-      <Route path="/404" element={<NotFound />} /> */}
+      <Route path="/unauthorized" element={<Unauthorized />} />
+      <Route path="/404" element={<NotFound />} />
       <Route path="*" element={<Navigate to="/404" replace />} />
     </Routes>
   );
