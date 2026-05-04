@@ -1,43 +1,51 @@
-// import axios from "axios";
-// import { useAuthStore } from "../../store/authStore";
+import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import { useAuthStore } from '../../store/authStore';
 
-// const api = axios.create({
-//   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1',
-// });
-
-// // Request interceptor to add Bearer token
-// api.interceptors.request.use((config) => {
-//   const token = useAuthStore.getState().token;
-//   if (token) {
-//     config.headers.Authorization = `Bearer ${token}`;
-//   }
-//   return config;
-// });
-
-// export default api;
-
-// api/axios.ts
-import axios from 'axios';
+// Extend AxiosRequestConfig to include _retry flag
+interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
 
 export const api = axios.create({
-    baseURL: '/api/v1',
-    withCredentials: true, // Crucial for cookies
+  baseURL: import.meta.env.VITE_API_URL || '/api/v1',
+  withCredentials: true,
+  timeout: 10000,
 });
 
-// Optional: Interceptor to handle token refresh automatically
-api.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-        const prevRequest = error?.config;
-        if (error?.response?.status === 401 && !prevRequest?._retry) {
-            prevRequest._retry = true;
-            try {
-                await api.post('/auth/refresh-token'); // Endpoint to refresh
-                return api(prevRequest);
-            } catch (refreshError) {
-                return Promise.reject(refreshError);
-            }
-        }
-        return Promise.reject(error);
+// Request interceptor
+api.interceptors.request.use(
+  (config: CustomAxiosRequestConfig) => {
+    // For JWT token approach (if not using cookies)
+    const token = useAuthStore.getState().user?.token;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response interceptor for token refresh
+api.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    const originalRequest = error.config as CustomAxiosRequestConfig;
+    
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        // Attempt to refresh token
+        await api.post('/auth/refresh-token');
+        return api(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed - logout user
+        useAuthStore.getState().logout();
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      }
+    }
+    
+    return Promise.reject(error);
+  }
 );
