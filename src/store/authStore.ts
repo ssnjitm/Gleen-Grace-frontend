@@ -10,7 +10,7 @@ interface User {
 }
 
 interface AuthState {
-  user: User | null;
+  user:any;
   isAuthenticated: boolean;
   tempEmail: string | null;
   isLoading: boolean;
