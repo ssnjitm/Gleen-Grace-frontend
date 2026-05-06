@@ -7,19 +7,16 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
 }
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  withCredentials: true,
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1',
+  withCredentials: true, // Crucial for cookies - this sends httpOnly cookies automatically
   timeout: 10000,
 });
 
-// Request interceptor
+// Request interceptor - No need to add token manually since cookies are sent automatically
 api.interceptors.request.use(
   (config: CustomAxiosRequestConfig) => {
-    // For JWT token approach (if not using cookies)
-    const token = useAuthStore.getState().user?.token;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    // For cookie-based auth, we don't need to add Authorization header
+    // The httpOnly cookies are sent automatically with withCredentials: true
     return config;
   },
   (error) => Promise.reject(error)
@@ -31,16 +28,21 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as CustomAxiosRequestConfig;
     
+    // Only attempt refresh on 401 errors and not already retried
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       
       try {
-        // Attempt to refresh token
+        // Attempt to refresh token using the refresh token cookie
+        // The refresh token is automatically sent via cookie
         await api.post('/auth/refresh-token');
+        // Retry the original request
         return api(originalRequest);
       } catch (refreshError) {
         // Refresh failed - logout user
-        useAuthStore.getState().logout();
+        const { logout } = useAuthStore.getState();
+        await logout();
+        // Redirect to login page
         window.location.href = '/login';
         return Promise.reject(refreshError);
       }

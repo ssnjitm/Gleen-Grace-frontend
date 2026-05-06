@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { api } from '../core/config/axios';
 
 interface User {
@@ -7,98 +8,83 @@ interface User {
   email?: string;
   fullName?: string;
   role?: string;
+  username?: string;
 }
 
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  isInitialized: boolean;
   
   // Actions
   setAuth: (user: User) => void;
   setLoading: (isLoading: boolean) => void;
-  checkAuth: () => Promise<boolean>;
   logout: () => Promise<void>;
   clearAuth: () => void;
+  hydrate: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
-  user: null,
-  isAuthenticated: false,
-  isLoading: false,
-  isInitialized: false,
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
 
-  setAuth: (user) => set({ 
-    user, 
-    isAuthenticated: true,
-    isLoading: false 
-  }),
+      setAuth: (user) => set({ 
+        user, 
+        isAuthenticated: true,
+        isLoading: false 
+      }),
 
-  setLoading: (isLoading) => set({ isLoading }),
+      setLoading: (isLoading) => set({ isLoading }),
 
-  // Check authentication status by calling a protected endpoint
-  checkAuth: async () => {
-    // Don't check if already checking
-    if (get().isLoading) return false;
-    
-    set({ isLoading: true });
-    
-    try {
-      // Try to get current user info - this will work if cookies are valid
-      const response = await api.get('/auth/me');
+      logout: async () => {
+        set({ isLoading: true });
+        
+        try {
+          await api.post('/auth/logout');
+        } catch (error) {
+          console.error('Logout error:', error);
+        } finally {
+          set({ 
+            user: null, 
+            isAuthenticated: false, 
+            isLoading: false
+          });
+        }
+      },
       
-      if (response.data?.data?.user) {
-        set({ 
-          user: response.data.data.user, 
-          isAuthenticated: true,
-          isLoading: false,
-          isInitialized: true
-        });
-        return true;
-      } else {
-        set({ 
-          user: null, 
-          isAuthenticated: false, 
-          isLoading: false,
-          isInitialized: true 
-        });
-        return false;
-      }
-    } catch (error) {
-      // If error (401), user is not authenticated
-      console.log('Auth check failed:', error);
-      set({ 
-        user: null, 
-        isAuthenticated: false, 
-        isLoading: false,
-        isInitialized: true 
-      });
-      return false;
+      clearAuth: () => {
+        set({ user: null, isAuthenticated: false, isLoading: false });
+      },
+      
+      hydrate: () => {
+        // Force rehydration from storage
+        const persisted = localStorage.getItem('auth-storage');
+        if (persisted) {
+          try {
+            const state = JSON.parse(persisted);
+            if (state.state?.user && state.state?.isAuthenticated) {
+              set({ 
+                user: state.state.user, 
+                isAuthenticated: state.state.isAuthenticated,
+                isLoading: false 
+              });
+            }
+          } catch (e) {
+            console.error('Failed to hydrate auth state', e);
+          }
+        }
+      },
+    }),
+    {
+      name: 'auth-storage',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ 
+        user: state.user, 
+        isAuthenticated: state.isAuthenticated 
+      }),
     }
-  },
-
-  logout: async () => {
-    set({ isLoading: true });
-    
-    try {
-      await api.post('/auth/logout');
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      set({ 
-        user: null, 
-        isAuthenticated: false, 
-        isLoading: false,
-        isInitialized: true
-      });
-      // Clear any stored data
-      localStorage.removeItem('auth-storage');
-    }
-  },
-  
-  clearAuth: () => {
-    set({ user: null, isAuthenticated: false, isLoading: false, isInitialized: false });
-    localStorage.removeItem('auth-storage');
-  },
-}));
+  )
+);

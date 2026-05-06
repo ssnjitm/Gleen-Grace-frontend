@@ -7,7 +7,6 @@ export interface User {
   role: UserRole;
   customerID?: string; // Optional if not always present
   createdAt?: string;
-  token?: string;
 }
 
 export interface AuthUser {
