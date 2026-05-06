@@ -50,4 +50,4 @@ export const useTheme = (): UseThemeReturn => {
   };
 
   return { mode, isDark, setMode, toggleTheme, theme };
-};
+};  

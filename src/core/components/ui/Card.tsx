@@ -21,7 +21,7 @@ export const Card: React.FC<CardProps> = ({
       onClick={onClick}
       className={cn(
         'bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 transition-all duration-200',
-        hover && 'hover:shadow-lg hover:scale-[1.02] cursor-pointer',
+        hover && 'hover:shadow-lg hover:shadow-blue-500/10 dark:hover:shadow-blue-900/30 hover:scale-[1.02] cursor-pointer',
         gradient && 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900',
         className
       )}
