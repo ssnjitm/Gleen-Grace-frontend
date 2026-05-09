@@ -70,6 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sidebar */}
       <aside className={`
+      fixed inset-0 bg-black/50 z-40
         fixed top-0 left-0 z-30 h-screen w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0
       `}>

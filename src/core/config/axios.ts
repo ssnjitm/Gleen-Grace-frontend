@@ -22,32 +22,64 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor for token refresh
+// // Response interceptor for token refresh
+// api.interceptors.response.use(
+//   (response) => response,
+//   async (error: AxiosError) => {
+//     const originalRequest = error.config as CustomAxiosRequestConfig;
+    
+//     // Only attempt refresh on 401 errors and not already retried
+//     if (error.response?.status === 401 && !originalRequest._retry) {
+//       originalRequest._retry = true;
+      
+//       try {
+//         // Attempt to refresh token using the refresh token cookie
+//         // The refresh token is automatically sent via cookie
+//         await api.post('/auth/refresh-token');
+//         // Retry the original request
+//         return api(originalRequest);
+//       } catch (refreshError) {
+//         // Refresh failed - logout user
+//         const { logout } = useAuthStore.getState();
+//         await logout();
+//         // Redirect to login page
+//         window.location.href = '/login';
+//         return Promise.reject(refreshError);
+//       }
+//     }
+    
+//     return Promise.reject(error);
+//   }
+// );
+
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as CustomAxiosRequestConfig;
-    
-    // Only attempt refresh on 401 errors and not already retried
+    const currentPath = window.location.pathname;
+
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // Don't intercept 401s if the user is already trying to log in
+      if (currentPath === '/login' || originalRequest.url?.includes('/auth/login')) {
+        return Promise.reject(error);
+      }
+
       originalRequest._retry = true;
       
       try {
-        // Attempt to refresh token using the refresh token cookie
-        // The refresh token is automatically sent via cookie
         await api.post('/auth/refresh-token');
-        // Retry the original request
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh failed - logout user
-        const { logout } = useAuthStore.getState();
-        await logout();
-        // Redirect to login page
-        window.location.href = '/login';
+        const { clearAuth } = useAuthStore.getState();
+        clearAuth(); 
+        
+        // Only redirect to login if we aren't already there
+        if (currentPath !== '/login') {
+          window.location.href = '/login?expired=true';
+        }
         return Promise.reject(refreshError);
       }
     }
-    
     return Promise.reject(error);
   }
 );
