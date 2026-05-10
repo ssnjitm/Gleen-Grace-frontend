@@ -121,3 +121,4 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
 };
 
 export default CategorySelector;
+

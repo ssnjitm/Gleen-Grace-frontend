@@ -53,52 +53,60 @@ const QuestionTabs: React.FC<QuestionTabsProps> = ({
         </div>
       </div>
       
-      <div className="p-4">
-        <div className="flex flex-wrap gap-2">
-          {questions.map((question, index) => (
-            <button
-              key={question.id}
-              type="button"
-              onClick={() => onQuestionSelect(question.id)}
-              className={cn(
-                'group relative px-3 py-1.5 rounded-lg transition-all flex items-center gap-2 text-sm',
-                activeQuestionId === question.id
-                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              )}
-            >
-              <span className="font-medium">Q{index + 1}</span>
-              {hasMedia(question) && (
-                <span className="text-xs opacity-70">
-                  {getMediaIcon(question)}
-                </span>
-              )}
-              {question.text && (
-                <span className="max-w-[100px] truncate text-xs opacity-80">
-                  {question.text.length > 20 ? question.text.substring(0, 20) + '...' : question.text}
-                </span>
-              )}
-              {questions.length > 1 && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDeleteQuestion(question.id, index);
-                  }}
-                  className={cn(
-                    'absolute -top-1 -right-1 p-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity',
-                    activeQuestionId === question.id
-                      ? 'bg-red-500 text-white hover:bg-red-600'
-                      : 'bg-red-100 text-red-600 hover:bg-red-200'
-                  )}
-                >
-                  <X className="w-2.5 h-2.5" />
-                </button>
-              )}
-            </button>
-          ))}
-        </div>
+     <div className="p-4">
+  <div className="flex flex-wrap gap-2">
+    {questions.map((question, index) => (
+      /* Changed from <button> to <div> */
+      <div
+        key={question.id}
+        role="button" // Accessibility: informs screen readers this is clickable
+        tabIndex={0}  // Accessibility: makes the div focusable via keyboard
+        onClick={() => onQuestionSelect(question.id)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') onQuestionSelect(question.id);
+        }}
+        className={cn(
+          'group relative px-3 py-1.5 rounded-lg transition-all flex items-center gap-2 text-sm cursor-pointer select-none',
+          activeQuestionId === question.id
+            ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md'
+            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+        )}
+      >
+        <span className="font-medium">Q{index + 1}</span>
+        
+        {hasMedia(question) && (
+          <span className="text-xs opacity-70">
+            {getMediaIcon(question)}
+          </span>
+        )}
+
+        {question.text && (
+          <span className="max-w-[100px] truncate text-xs opacity-80">
+            {question.text.length > 20 ? question.text.substring(0, 20) + '...' : question.text}
+          </span>
+        )}
+
+        {questions.length > 1 && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevents onQuestionSelect from firing
+              onDeleteQuestion(question.id, index);
+            }}
+            className={cn(
+              'absolute -top-1 -right-1 p-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity',
+              activeQuestionId === question.id
+                ? 'bg-red-500 text-white hover:bg-red-600'
+                : 'bg-red-100 text-red-600 hover:bg-red-200'
+            )}
+          >
+            <X className="w-2.5 h-2.5" />
+          </button>
+        )}
       </div>
+    ))}
+  </div>
+</div>
     </div>
   );
 };

@@ -14,6 +14,9 @@ import { NotFound } from '../core/components/common/NotFound';
 import { Dashboard } from '../pages/dashboard/Dashboard';
 import { QuizList } from '../pages/quiz/QuizList';
 import { QuizDetail } from '../pages/quiz/QuizDetail';
+import { QuizEdit } from '../pages/quiz/QuizEdit';
+import { QuizSettings } from '../pages/quiz/QuizSettings';
+import QuizCreator from '../pages/quiz/QuizCreator';
 
 
 // // Dashboard Pages
@@ -48,11 +51,11 @@ export const AppRoutes = () => {
         {/* Quiz Management Routes */}
         <Route path="/quiz-management" element={<Navigate to="/dashboard/quiz" replace />} />
         <Route path="/dashboard/quiz" element={<QuizList />} />
-        {/* <Route path="/dashboard/quiz/create" element={<QuizCreator />} /> */}
+        <Route path="/dashboard/quiz/create" element={<QuizCreator />} />
         <Route path="/dashboard/quiz/:id" element={<QuizDetail />} />
-        {/* <Route path="/dashboard/quiz/edit/:id" element={<QuizEdit />} />
-        <Route path="/dashboard/quiz/:id/analytics" element={<QuizAnalytics />} />
-        <Route path="/dashboard/quiz/:id/settings" element={<QuizSettings />} /> */}
+       <Route path="/dashboard/quiz/edit/:id" element={<QuizEdit />} />
+        {/* <Route path="/dashboard/quiz/:id/analytics" element={<QuizAnalyticsics />} /> */}
+        <Route path="/dashboard/quiz/:id/settings" element={<QuizSettings />} /> 
         
         {/* Admin only routes */}
         <Route element={<RoleGuard allowedRoles={['ADMIN']} />}>

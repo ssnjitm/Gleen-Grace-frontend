@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, GripVertical, BookOpen, FileText, Sparkles, Calendar, Layers, Users } from 'lucide-react';
-import type { MediaAttachment, QuestionFormData, QuizFormData, QuizSetDB } from '../../core/types/quiz.types';
+import type { Category, MediaAttachment, QuestionFormData, QuizFormData, QuizSetDB } from '../../core/types/quiz.types';
 import { useResize } from './hooks/useResize';
 import { getValidationErrors } from './validation';
 import QuizHeader from '../../core/components/quiz/QuizHeader';
@@ -78,7 +78,7 @@ const QuizCreator: React.FC<QuizCreatorProps> = ({ initialQuiz, isEditing = fals
   const activeIndex = questions.findIndex(q => q.id === activeQuestionId);
 
   // Category options for the selector
-  const categoryOptions = categories?.map(cat => ({
+  const categoryOptions = categories?.map((cat: Category) => ({
     id: cat._id,
     label: cat.name,
     icon: getCategoryIcon(cat.name),

@@ -76,3 +76,13 @@ export interface QuizFilters {
 }
 
 export interface QuizQueryParams extends QuizFilters {}
+
+export type QuizCategory = 'course' | 'general' | 'daily' | 'event' | 'series' | 'assessment';
+
+export interface CategoryOption {
+  id: QuizCategory;
+  label: string;
+  icon: React.ElementType;
+  color: string;
+  description: string;
+}

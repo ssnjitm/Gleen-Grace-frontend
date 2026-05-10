@@ -44,13 +44,29 @@ export const useQuizzes = (params: QuizQueryParams) => {
 };
 
 // Fetch single quiz
+// export const useQuizById = (id: string | null) => {
+//   const { setCurrentQuiz } = useQuizUIStore();
+  
+//   return useQuery({
+//     queryKey: quizKeys.detail(id!),
+//     queryFn: async () => {
+//       const response = await api.get(`/quiz-sets/${id}`);
+//       const quiz = response.data.data;
+//       setCurrentQuiz(quiz);
+//       return quiz as QuizSetDB;
+//     },
+//     enabled: !!id,
+//     staleTime: 5 * 60 * 1000,
+//   });
+// };
 export const useQuizById = (id: string | null) => {
   const { setCurrentQuiz } = useQuizUIStore();
   
   return useQuery({
     queryKey: quizKeys.detail(id!),
     queryFn: async () => {
-      const response = await api.get(`/quiz-sets/${id}`);
+      // Ensure this matches your backend "Get Single Quiz" route
+      const response = await api.get(`/quiz-sets/${id}`); 
       const quiz = response.data.data;
       setCurrentQuiz(quiz);
       return quiz as QuizSetDB;
@@ -59,13 +75,25 @@ export const useQuizById = (id: string | null) => {
     staleTime: 5 * 60 * 1000,
   });
 };
-
 // Fetch categories
+// export const useCategories = () => {
+//   return useQuery({
+//     queryKey: quizKeys.categories(),
+//     queryFn: async () => {
+//       const response = await api.get('/categories');
+//       return response.data.data as Category[];
+//     },
+//     staleTime: 30 * 60 * 1000,
+//   });
+// };
+
+// In useQuizQueries.ts
 export const useCategories = () => {
   return useQuery({
     queryKey: quizKeys.categories(),
     queryFn: async () => {
-      const response = await api.get('/categories');
+      // Change from '/categories' to '/quiz-sets/categories'
+      const response = await api.get('/quiz-sets/categories');
       return response.data.data as Category[];
     },
     staleTime: 30 * 60 * 1000,
@@ -92,6 +120,8 @@ export const useCreateQuiz = () => {
     },
   });
 };
+
+
 
 // Update quiz mutation
 export const useUpdateQuiz = () => {
@@ -160,3 +190,4 @@ export const useBulkDeleteQuizzes = () => {
     },
   });
 };
+
