@@ -4,8 +4,6 @@ import { api } from '../../../core/config/axios';
 import type { QuizFormData, QuizQueryParams, QuizSetDB } from '../../../core/types/quiz.types';
 import { useQuizUIStore } from '../../../store/quizUIStore';
 import type { Category } from '../../../core/types/quizTypes';
-// import { QuizSetDB, QuizFormData, QuizQueryParams, Category } from '../../../types/quiz.types';
-// import { useQuizUIStore } from '../store/quizUIStore';
 
 // Query Keys
 export const quizKeys = {
@@ -44,28 +42,12 @@ export const useQuizzes = (params: QuizQueryParams) => {
 };
 
 // Fetch single quiz
-// export const useQuizById = (id: string | null) => {
-//   const { setCurrentQuiz } = useQuizUIStore();
-  
-//   return useQuery({
-//     queryKey: quizKeys.detail(id!),
-//     queryFn: async () => {
-//       const response = await api.get(`/quiz-sets/${id}`);
-//       const quiz = response.data.data;
-//       setCurrentQuiz(quiz);
-//       return quiz as QuizSetDB;
-//     },
-//     enabled: !!id,
-//     staleTime: 5 * 60 * 1000,
-//   });
-// };
 export const useQuizById = (id: string | null) => {
   const { setCurrentQuiz } = useQuizUIStore();
   
   return useQuery({
     queryKey: quizKeys.detail(id!),
     queryFn: async () => {
-      // Ensure this matches your backend "Get Single Quiz" route
       const response = await api.get(`/quiz-sets/${id}`); 
       const quiz = response.data.data;
       setCurrentQuiz(quiz);
@@ -75,24 +57,12 @@ export const useQuizById = (id: string | null) => {
     staleTime: 5 * 60 * 1000,
   });
 };
-// Fetch categories
-// export const useCategories = () => {
-//   return useQuery({
-//     queryKey: quizKeys.categories(),
-//     queryFn: async () => {
-//       const response = await api.get('/categories');
-//       return response.data.data as Category[];
-//     },
-//     staleTime: 30 * 60 * 1000,
-//   });
-// };
 
-// In useQuizQueries.ts
+// Fetch categories
 export const useCategories = () => {
   return useQuery({
     queryKey: quizKeys.categories(),
     queryFn: async () => {
-      // Change from '/categories' to '/quiz-sets/categories'
       const response = await api.get('/quiz-sets/categories');
       return response.data.data as Category[];
     },
@@ -121,16 +91,72 @@ export const useCreateQuiz = () => {
   });
 };
 
+// // Update quiz mutation
+// export const useUpdateQuiz = () => {
+//   const queryClient = useQueryClient();
+//   const { closeEditModal } = useQuizUIStore();
+  
+//   return useMutation({
+//     mutationFn: async ({ id, data }: { id: string; data: Partial<QuizFormData> }) => {
+//       const response = await api.patch(`/quiz-sets/${id}`, data);
+//       return response.data.data as QuizSetDB;
+//     },
+//     onSuccess: (_, variables) => {
+//       queryClient.invalidateQueries({ queryKey: quizKeys.lists() });
+//       queryClient.invalidateQueries({ queryKey: quizKeys.detail(variables.id) });
+//       toast.success('Quiz updated successfully!');
+//       closeEditModal();
+//     },
+//     onError: (error: any) => {
+//       toast.error(error?.response?.data?.message || 'Failed to update quiz');
+//     },
+//   })
+// };
 
-
-// Update quiz mutation
 export const useUpdateQuiz = () => {
   const queryClient = useQueryClient();
   const { closeEditModal } = useQuizUIStore();
   
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<QuizFormData> }) => {
-      const response = await api.patch(`/quiz-sets/update/${id}`, data);
+      const { _id, id: clientId, createdAt, updatedAt, ...cleanData } = data as any;
+
+      if (cleanData.category && typeof cleanData.category === 'object') {
+        cleanData.category = cleanData.category._id || cleanData.category.id;
+      }
+
+      if (cleanData.questions && Array.isArray(cleanData.questions)) {
+        cleanData.questions = cleanData.questions.map((q: any, idx: number) => {
+          // Normalize the question type structure to match backend strings
+          let matchedType = q.type;
+          if (matchedType === 'mcq') matchedType = "MCQ";
+          if (matchedType === 'truefalse') matchedType = "TRUE_FALSE";
+
+          // Guarantee valid array properties to satisfy Mongoose length validators
+          let processedOptions = Array.isArray(q.options) ? q.options : [];
+          if (matchedType === "TRUE_FALSE" && processedOptions.length !== 2) {
+            processedOptions = ["True", "False"];
+          }
+
+          // Map client string answers back to schema numeric indexes safely
+          let mappedIndex = Number(q.correctAnswerIndex);
+          if (isNaN(mappedIndex) && q.correctAnswer !== undefined) {
+            mappedIndex = processedOptions.indexOf(q.correctAnswer);
+          }
+
+          return {
+            questionNo: Number(q.questionNo) || (idx + 1),
+            type: matchedType,
+            text: q.text || "",
+            options: processedOptions,
+            // 🌟 Match the exact schema name (correctAnswerIndex instead of correctAnswer)
+            correctAnswerIndex: mappedIndex >= 0 ? mappedIndex : 0,
+            explanation: q.explanation || ""
+          };
+        });
+      }
+
+      const response = await api.patch(`/quiz-sets/${id}`, cleanData);
       return response.data.data as QuizSetDB;
     },
     onSuccess: (_, variables) => {
@@ -145,6 +171,37 @@ export const useUpdateQuiz = () => {
   });
 };
 
+
+// Update your hook inside useQuizQueries.ts:
+// export const useUpdateQuiz = () => {
+//   const queryClient = useQueryClient();
+//   const { closeEditModal } = useQuizUIStore();
+  
+//   return useMutation({
+//     mutationFn: async ({ id, data }: { id: string; data: Partial<QuizFormData> }) => {
+//       // 🌟 Destructure and omit read-only fields that cause Mongoose schema re-assignment failures
+//       const { _id, id: clientId, createdAt, updatedAt, ...sanitizedPayload } = data as any;
+
+//       // If data contains an inline array of questions, clean up individual question IDs too
+//       if (sanitizedPayload.questions && Array.isArray(sanitizedPayload.questions)) {
+//         sanitizedPayload.questions = sanitizedPayload.questions.map(({ _id, ...q }) => q);
+//       }
+
+//       const response = await api.patch(`/quiz-sets/${id}`, sanitizedPayload);
+//       return response.data.data as QuizSetDB;
+//     },
+//     onSuccess: (_, variables) => {
+//       queryClient.invalidateQueries({ queryKey: quizKeys.lists() });
+//       queryClient.invalidateQueries({ queryKey: quizKeys.detail(variables.id) });
+//       toast.success('Quiz updated successfully!');
+//       closeEditModal();
+//     },
+//     onError: (error: any) => {
+//       toast.error(error?.response?.data?.message || 'Failed to update quiz');
+//     },
+//   });
+// };
+
 // Delete quiz mutation
 export const useDeleteQuiz = () => {
   const queryClient = useQueryClient();
@@ -152,7 +209,8 @@ export const useDeleteQuiz = () => {
   
   return useMutation({
     mutationFn: async (id: string) => {
-      await api.delete(`/quiz-sets/update/${id}`);
+      // ✅ Fixed: Removed "/update" to target clean REST endpoint DELETE /api/v1/quiz-sets/:id
+      await api.delete(`/quiz-sets/${id}`);
       return id;
     },
     onSuccess: (deletedId) => {
@@ -177,7 +235,8 @@ export const useBulkDeleteQuizzes = () => {
   
   return useMutation({
     mutationFn: async (ids: string[]) => {
-      await Promise.all(ids.map(id => api.delete(`/quiz-sets/update/${id}`)));
+      // ✅ Fixed: Removed "/update" here as well
+      await Promise.all(ids.map(id => api.delete(`/quiz-sets/${id}`)));
       return ids;
     },
     onSuccess: () => {
@@ -190,4 +249,3 @@ export const useBulkDeleteQuizzes = () => {
     },
   });
 };
-

@@ -18,6 +18,10 @@ import { QuizEdit } from '../pages/quiz/QuizEdit';
 import { QuizSettings } from '../pages/quiz/QuizSettings';
 import QuizCreator from '../pages/quiz/QuizCreator';
 
+// Admin Pages
+import AdminDashboard from '../pages/dashboard/admin/AdminDashboard';
+import SystemHealthPage from '../pages/dashboard/admin/SystemHealthPage';
+
 
 // // Dashboard Pages
 // import { Dashboard } from '../features/dashboard/pages/Dashboard';
@@ -58,19 +62,20 @@ export const AppRoutes = () => {
         <Route path="/dashboard/quiz/:id/settings" element={<QuizSettings />} /> 
         
         {/* Admin only routes */}
-        <Route element={<RoleGuard allowedRoles={['ADMIN']} />}>
-          {/* <Route path="/admin/users" element={<UserManagement />} /> */}
+        <Route element={<RoleGuard allowedRoles={['admin']} />}>
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/system-health" element={<SystemHealthPage />} />
           <Route path="/admin/settings" element={<div>Admin Settings</div>} />
         </Route>
 
         {/* Editor/Developer routes */}
-        <Route element={<RoleGuard allowedRoles={['EDITOR', 'DEVELOPER', 'ADMIN']} />}>
+        <Route element={<RoleGuard allowedRoles={['editor', 'developer', 'admin']} />}>
           <Route path="/content" element={<div>Content Management</div>} />
           <Route path="/analytics" element={<div>Analytics Dashboard</div>} />
         </Route>
 
         {/* Developer only routes */}
-        <Route element={<RoleGuard allowedRoles={['DEVELOPER']} />}>
+        <Route element={<RoleGuard allowedRoles={['developer']} />}>
           <Route path="/developer/logs" element={<div>System Logs</div>} />
           <Route path="/developer/api-keys" element={<div>API Keys Management</div>} />
         </Route>

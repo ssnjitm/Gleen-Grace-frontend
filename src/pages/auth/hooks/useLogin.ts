@@ -82,59 +82,48 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: async (credentials: any) => {
       const response = await api.post('/auth/login', credentials);
-      return response.data; 
+      return response.data.data; 
     },
-    // onSuccess: async (responseData) => {
-    //   // DEBUG: Look at this in your browser console!
-    //   console.log('Full Response Data:', responseData);
-
-    //   // Check both common nested structures
-    //   const user = responseData?.data?.user || responseData?.user;
-      
-    //   if (user) {
-    //     const fullUser = {
-    //       id: user.id || user._id,
-    //       customerID: user.customerID,
-    //       email: user.email,
-    //       fullName: user.fullName,
-    //       role: user.role,
-    //       username: user.username,
-    //     };
-        
-    //     setAuth(fullUser);
-        
-    //     // Ensure queries are fresh
-    //     await queryClient.invalidateQueries({ queryKey: ['user'] });
-        
-    //     toast.success('Logged in successfully!');
-        
-    //     // Use replace: true to prevent "back" button returning to login
-    //     navigate('/dashboard', { replace: true });
-    //   } else {
-    //     console.error('User data missing. Check response structure:', responseData);
-    //     toast.error('Login failed: Invalid server response');
-    //   }
-    // },
 
     onSuccess: async (data) => {
-  const user = data?.data?.user || data?.user;
-  
-  if (user) {
-    // 1. Set Auth first
-    setAuth(user);
+      // Data structure: { user: {...}, accessToken, refreshToken }
+      const user = data?.user;
+      
+      console.log('Login Response - Full Data:', data);
+      console.log('Login Response - User:', user);
+      console.log('User Role:', user?.role);
+      
+      if (user) {
+        // Create complete user object with all fields
+        const fullUser = {
+          id: user.id || user._id,
+          customerID: user.customerID,
+          email: user.email,
+          fullName: user.fullName,
+          role: user.role, // Make sure role is included
+          username: user.username,
+        };
+        
+        console.log('Full User Object to Store:', fullUser);
+        
+        // Set Auth - this persists to localStorage
+        setAuth(fullUser);
+        
+        // Invalidate queries
+        queryClient.invalidateQueries({ queryKey: ['user'] });
+
+        toast.success('Logged in successfully!');
+
+        // Small delay ensures Zustand and localStorage are ready
+        setTimeout(() => {
+          navigate('/dashboard', { replace: true });
+        }, 100); 
+      } else {
+        console.error('User data missing. Response:', data);
+        toast.error('Login failed: No user data received');
+      }
+    },
     
-    // 2. Invalidate queries but DON'T await them if they might 401
-    queryClient.invalidateQueries({ queryKey: ['user'] });
-
-    toast.success('Logged in successfully!');
-
-    // 3. Small delay ensures Zustand and Cookies are ready
-    setTimeout(() => {
-      // Use replace: true so the user can't go 'back' to login
-      navigate('/dashboard', { replace: true });
-    }, 100); 
-  }
-},
     onError: (error: any) => {
       const message = error?.response?.data?.message || 'Invalid credentials';
       toast.error(message);

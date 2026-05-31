@@ -119,6 +119,29 @@ export const Dashboard = () => {
     }
   ];
 
+  // Add admin features if user is admin
+  if (user?.role === 'admin') {
+    console.log('✅ ADMIN user detected - adding admin features');
+    features.push(
+      {
+        title: 'Admin Dashboard',
+        description: 'Manage users, view system statistics, and oversee platform operations.',
+        icon: 'Users',
+        color: 'bg-indigo-500',
+        path: '/admin/dashboard',
+      },
+      {
+        title: 'System Health',
+        description: 'Monitor system performance, resource usage, and health metrics.',
+        icon: 'Activity',
+        color: 'bg-cyan-500',
+        path: '/admin/system-health',
+      }
+    );
+  } else {
+    console.log('❌ User is not ADMIN. User role:', user?.role, 'User object:', user);
+  }
+
   // Loading skeleton for stats
   if (statsLoading) {
     return (
