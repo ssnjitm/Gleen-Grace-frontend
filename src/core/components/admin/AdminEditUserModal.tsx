@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Loader } from 'lucide-react';
-import type { AdminUser } from '../../../types/admin.types';
+import type { AdminUser } from '../../types/admin.types';
 
 interface AdminEditUserModalProps {
   isOpen: boolean;

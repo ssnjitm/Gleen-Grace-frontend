@@ -40,11 +40,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
     return validTypes[type as keyof typeof validTypes];
   };
 
-  const getColorClasses = (
-    color: string, 
-    isActive: boolean, 
-    isExpanded: boolean
-) => {
+  const getColorClasses = (color: string) => {
     const colorMap: Record<string, { active: string; inactive: string; hover: string }> = {
       purple: {
         active: 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800',
@@ -92,7 +88,7 @@ const MediaUploader: React.FC<MediaUploaderProps> = ({
         const mediaItem = media.find(m => m.type === type);
         const isActive = !!mediaItem;
         const isExpanded = expandedMediaFor?.questionId === questionId && expandedMediaFor?.type === type;
-        const colorClasses = getColorClasses(color, isActive, isExpanded);
+        const colorClasses = getColorClasses(color);
         
         return (
           <div key={type} className="relative">

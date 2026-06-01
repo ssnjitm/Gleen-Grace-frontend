@@ -53,7 +53,13 @@ export interface SystemHealth {
   };
   server: {
     uptime: number;
-    memoryUsage: NodeJS.MemoryUsage;
+    memoryUsage: {
+      rss: number;
+      heapTotal: number;
+      heapUsed: number;
+      external: number;
+      arrayBuffers: number;
+    };
     nodeVersion: string;
     platform: string;
     cpuCores: number;

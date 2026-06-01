@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuizById, useUpdateQuiz } from './hooks/useQuizQueries';
+import { useQuizById } from './hooks/useQuizQueries';
 import { Loader } from 'lucide-react';
 import { Card } from '../../core/components/ui/Card';
 import { Button } from '../../core/components/ui/Button';

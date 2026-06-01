@@ -109,10 +109,12 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   _hasHydrated: boolean; // Tracking hydration state
+  tempEmail: string | null;
   
   setAuth: (user: User) => void;
   setLoading: (isLoading: boolean) => void;
   setHasHydrated: (state: boolean) => void;
+  setTempEmail: (tempEmail: string | null) => void;
   logout: () => Promise<void>;
   clearAuth: () => void;
 }
@@ -124,6 +126,7 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false,
       _hasHydrated: false, // Initial state
+      tempEmail: null,
 
       setAuth: (user) => set({ 
         user, 
@@ -134,6 +137,8 @@ export const useAuthStore = create<AuthState>()(
       setLoading: (isLoading) => set({ isLoading }),
       
       setHasHydrated: (state) => set({ _hasHydrated: state }),
+
+      setTempEmail: (tempEmail) => set({ tempEmail }),
 
       logout: async () => {
         set({ isLoading: true });

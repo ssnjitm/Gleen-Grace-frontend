@@ -185,7 +185,7 @@ const QuizCreator: React.FC<QuizCreatorProps> = ({ initialQuiz, isEditing = fals
   };
 
   // Media handlers
-  const toggleMedia = (questionId: string, type: MediaAttachment['type'], mediaItem?: MediaAttachment) => {
+  const toggleMedia = (questionId: string, type: MediaAttachment['type'], _mediaItem?: MediaAttachment) => {
     setQuestions(questions.map(q => {
       if (q.id === questionId) {
         const hasMedia = q.media.some(m => m.type === type);
@@ -214,7 +214,7 @@ const QuizCreator: React.FC<QuizCreatorProps> = ({ initialQuiz, isEditing = fals
     }));
   };
 
-  const removeMediaFile = (questionId: string, type: MediaAttachment['type'], mediaItem?: MediaAttachment) => {
+  const removeMediaFile = (questionId: string, type: MediaAttachment['type'], _mediaItem?: MediaAttachment) => {
     setQuestions(questions.map(q => {
       if (q.id === questionId) {
         return { ...q, media: q.media.filter(m => m.type !== type) };

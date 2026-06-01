@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, Edit2, Trash2, Shield, AlertCircle, CheckCircle } from 'lucide-react';
-import type { AdminUser } from '../../../types/admin.types';
+import type { AdminUser } from '../../types/admin.types';
 
 interface AdminUserTableProps {
   users: AdminUser[];

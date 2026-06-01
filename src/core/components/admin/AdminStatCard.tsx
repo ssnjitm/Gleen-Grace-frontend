@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, TrendingDown, Activity } from 'lucide-react';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 
 interface AdminStatCardProps {
   title: string;
