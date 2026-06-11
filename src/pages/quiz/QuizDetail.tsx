@@ -26,7 +26,7 @@ export const QuizDetail = () => {
 
   const handleDuplicate = () => {
     // Implement duplicate logic
-    console.log('Duplicate quiz:', id);
+    console.log('Duplicate quiz to see on console :', id);
   };
 
   const tabs = [
